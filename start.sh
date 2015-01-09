@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" == "backup" ]; then
-    if [ -n $2 ]; then
+    if [ -n "$2" ]; then
         databases=$2
     else
         if [ -n $MYSQL_PASSWORD ]; then      
@@ -33,7 +33,7 @@ if [ "$1" == "backup" ]; then
         fi
     done
 elif [ "$1" == "restore" ]; then
-    if [ -n $2 ]; then
+    if [ -n "$2" ]; then
         archives=$2.gz
     else
         archives=`aws s3 ls s3://$S3_BUCKET/$S3_PATH/ | awk '{print $4}'`
