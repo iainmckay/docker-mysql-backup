@@ -1,4 +1,4 @@
-# etcd-backup
+# mysql-backup
 
 Container that backs up MySQL databases to S3. The container overwrites the same S3 object every time it is run, it is recommended you turn
 versioning on to retain access to previous copies.
