@@ -1,24 +1,39 @@
 #!/bin/bash
 
+EXCLUDE_OPT=
+PASS_OPT=
+
+for i in "$@"; do
+    case $i in
+        --exclude=*)
+        EXCLUDE_OPT="${i#*=}"
+        shift
+        ;;
+        *)
+            # unknown option
+        ;;
+    esac
+done
+
+if [ -n $MYSQL_PASSWORD ]; then
+    PASS_OPT="--password=${MYSQL_PASSWORD}"
+fi
+
+if [ -n $EXCLUDE_OPT ]; then
+    EXCLUDE_OPT="| grep -Ev (${EXCLUDE_OPT//,/|})"
+fi
+
 if [ "$1" == "backup" ]; then
     if [ -n "$2" ]; then
         databases=$2
     else
-        if [ -n $MYSQL_PASSWORD ]; then      
-            databases=`mysql --user=$MYSQL_USER --host=$MYSQL_HOST --port=$MYSQL_PORT --password=$MYSQL_PASSWORD -e "SHOW DATABASES;" | grep -Ev "(Database|information_schema|performance_schema)"`
-        else
-            databases=`mysql --user=$MYSQL_USER --host=$MYSQL_HOST --port=$MYSQL_PORT -e "SHOW DATABASES;" | grep -Ev "(Database|information_schema|performance_schema)"`
-        fi
+        databases=`mysql --user=$MYSQL_USER --host=$MYSQL_HOST --port=$MYSQL_PORT ${PASS_OPT} -e "SHOW DATABASES;" | grep -Ev "(Database|information_schema|performance_schema) ${EXCLUDE_OPT}"`
     fi
  
     for db in $databases; do
         echo "dumping $db"
 
-        if [ -n $MYSQL_PASSWORD ]; then
-            mysqldump --force --opt --host=$MYSQL_HOST --port=$MYSQL_PORT --user=$MYSQL_USER --password=$MYSQL_PASSWORD --databases $db | gzip > "/tmp/$db.gz"
-        else
-            mysqldump --force --opt --host=$MYSQL_HOST --port=$MYSQL_PORT --user=$MYSQL_USER --databases $db | gzip > "/tmp/$db.gz"
-        fi
+        mysqldump --force --opt --host=$MYSQL_HOST --port=$MYSQL_PORT --user=$MYSQL_USER --databases $db ${PASS_OPT} | gzip > "/tmp/$db.gz"
 
         if [ $? == 0 ]; then
             aws s3 cp /tmp/$db.gz s3://$S3_BUCKET/$S3_PATH/$db.gz
@@ -36,7 +51,7 @@ elif [ "$1" == "restore" ]; then
     if [ -n "$2" ]; then
         archives=$2.gz
     else
-        archives=`aws s3 ls s3://$S3_BUCKET/$S3_PATH/ | awk '{print $4}'`
+        archives=`aws s3 ls s3://$S3_BUCKET/$S3_PATH/ | awk '{print $4}' ${EXCLUDE_OPT}`
     fi
 
     for archive in $archives; do

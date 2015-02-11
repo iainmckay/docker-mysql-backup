@@ -21,6 +21,14 @@ To restore an existing backup run:
 
 It is important to note that if this database already exists on your server, this process will drop it first. You can also provide an extra argument with a specific database to restore.
 
+## Excluding Databases
+
+You can exclude databases from backup/restore by using --exclude.
+
+For example:
+
+	$ docker run -e AWS_ACCESS_KEY_ID="key" -e AWS_SECRET_ACCESS_KEY="secret" -e AWS_DEFAULT_REGION="eu-west-1" -e MYSQL_HOST=127.0.0.1 -e MYSQL_USER=root -e MYSQL_PASSWORD=password iainmckay/mysql-backup --exclude some_database restore
+
 ## Configuration 
 
 The container can be customized with these environment variables:
