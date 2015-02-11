@@ -27,7 +27,7 @@ You can exclude databases from backup/restore by using --exclude.
 
 For example:
 
-	$ docker run -e AWS_ACCESS_KEY_ID="key" -e AWS_SECRET_ACCESS_KEY="secret" -e AWS_DEFAULT_REGION="eu-west-1" -e MYSQL_HOST=127.0.0.1 -e MYSQL_USER=root -e MYSQL_PASSWORD=password iainmckay/mysql-backup --exclude some_database restore
+	$ docker run -e AWS_ACCESS_KEY_ID="key" -e AWS_SECRET_ACCESS_KEY="secret" -e AWS_DEFAULT_REGION="eu-west-1" -e MYSQL_HOST=127.0.0.1 -e MYSQL_USER=root -e MYSQL_PASSWORD=password iainmckay/mysql-backup --exclude=some_database,another_database restore
 
 ## Configuration 
 
